@@ -16,7 +16,7 @@ endif()
 
 add_executable(option_test EXCLUDE_FROM_ALL optional.cpp)
 target_link_libraries(option_test GTest::gtest GTest::gtest_main option::option)
-set_property(TARGET option_test PROPERTY CXX_STANDARD 11)
+set_target_properties(option_test PROPERTIES CXX_STANDARD 11)
 
 add_warnings(option_test)
 add_werror(option_test)
