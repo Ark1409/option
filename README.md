@@ -43,23 +43,28 @@ If there exists a representation of your type that is guaranteed to be invalid f
 (e.g. violated invariants), the representation of that value can be used to encode an empty `optional`.
 
 ```cpp
-struct S {
-    std::uint64_t n; // Assume can never be 3
+struct A {
+    void* n; // Assume can never be nullptr
 };
 
-inline bool operator==(S a, S b) noexcept {
+inline bool operator==(A a, A b) noexcept {
     return a.n == b.n;
 }
 
 template<>
-struct option::optional_traits<S> {
-    static constexpr S empty() noexcept { return {3}; }
+struct option::optional_traits<A> {
+    static constexpr A empty() noexcept { return {nullptr}; }
 };
 
-static_assert(sizeof(option::optional<S>) == sizeof(S));
+struct B {
+    void* n;
+};
+
+static_assert(sizeof(option::optional<A>) == sizeof(A));
+static_assert(sizeof(option::optional<B>) > sizeof(option::optional<A>));
 ```
 
-In this case, `option::optional<S>` will use the empty representation given by `option::optional_traits<S>::empty()`,
+In this case, `option::optional<A>` will use the empty representation given by `option::optional_traits<A>::empty()`,
 reducing the size the `optional`.
 
 ### Detailed requirements
@@ -75,7 +80,7 @@ following `static` functions to implement the class' functionality:
 
 Notice how the underlying type `U` need not match the type `T` of the `optional` itself.
 
-# Building / Using
+# Building / Usage
 Building from source is as simple as
 ```sh
 cmake [-DOPTION_TESTS=ON] -S . -B build
