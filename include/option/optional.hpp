@@ -128,10 +128,17 @@ namespace option {
             return (*std::forward<Object>(object)) .* member;
         }
 
+        template<class, class F, class... Args>
+        struct invoke_result_impl {
+        };
+
         template<class F, class... Args>
-        struct invoke_result {
+        struct invoke_result_impl<typename void_t<decltype(invoke(std::declval<F>(), std::declval<Args>()...))>::type, F, Args...> {
             using type = decltype(invoke(std::declval<F>(), std::declval<Args>()...));
         };
+
+        template<class F, class... Args>
+        using invoke_result = invoke_result_impl<void, F, Args...>;
 
         template<class F, class... Args>
         using invoke_result_t = typename invoke_result<F, Args...>::type;
@@ -387,7 +394,7 @@ namespace option {
 #endif
                 && std::is_constructible<T, U>::value
                 && std::is_assignable<T&, U>::value
-                && (!std::is_scalar<T>::value || std::is_same<typename std::decay<U>, T>::value)
+                && (!std::is_scalar<T>::value || std::is_same<typename std::decay<U>::type, T>::value)
                 >::type* = nullptr>
             OPTION_CXX14_CONSTEXPR optional_base_helper& operator=(U&& value) noexcept(std::is_nothrow_constructible<T, U>::value && std::is_nothrow_assignable<T&, U>::value) {
                 if (has_value()) {
@@ -527,7 +534,7 @@ namespace option {
             }
 
             template <class F>
-            OPTION_CXX14_CONSTEXPR remove_cv_t<remove_reference_t<invoke_result_t<F, T &>>> and_then(F&& f) & noexcept(is_nothrow_invocable<F, T&>::value) {
+            OPTION_CXX14_CONSTEXPR remove_cv_t<remove_reference_t<invoke_result_t<F, T&>>> and_then(F&& f) & noexcept(is_nothrow_invocable<F, T&>::value) {
                 if (*this)
                     return invoke(std::forward<F>(f), value());
                 else
@@ -535,7 +542,7 @@ namespace option {
             }
 
             template <class F>
-            OPTION_CXX14_CONSTEXPR remove_cv_t<remove_reference_t<invoke_result_t<F, const T &>>> and_then(F&& f) const & noexcept(is_nothrow_invocable<F, const T&>::value) {
+            OPTION_CXX14_CONSTEXPR remove_cv_t<remove_reference_t<invoke_result_t<F, const T&>>> and_then(F&& f) const & noexcept(is_nothrow_invocable<F, const T&>::value) {
                 if (*this)
                     return invoke(std::forward<F>(f), value());
                 else
@@ -1036,6 +1043,8 @@ namespace option {
       }
 
       static constexpr T& convert(T* p) noexcept { return *p; }
+
+      template<class U = T, typename std::enable_if<!std::is_const<U>::value>::type* = nullptr>
       static constexpr const T& convert(const T* p) noexcept { return *p; }
     };
 

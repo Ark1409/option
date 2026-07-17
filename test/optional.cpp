@@ -1,5 +1,6 @@
 #include <option/optional.hpp>
 #include <gtest/gtest.h>
+#include <optional>
 #include <string>
 #include <type_traits>
 #include <iterator>
@@ -247,21 +248,21 @@ TEST(OptionalTest, ShouldEmplace) {
 TEST(OptionalTest, ShouldTransform) {
     {
         optional<int> o{2};
-        auto t = o.transform([] (int i) { return i == 2; } );
+        auto t = o.transform([] (int& i) { return i == 2; } );
         EXPECT_EQ(t, true);
 
         optional<int> o1{};
-        auto t1 = o1.transform([] (int i) { return i == 2; } );
+        auto t1 = o1.transform([] (int& i) { return i == 2; } );
         EXPECT_EQ(t1, nullopt);
     }
 
     {
         optional<bool> o{false};
-        auto t = o.transform([] (bool i) { return i ? 33 : 1; } );
+        auto t = o.transform([] (bool& i) { return i ? 33 : 1; } );
         EXPECT_EQ(t, 1);
 
         optional<bool> o1{};
-        auto t1 = o1.transform([] (int i) { return i ? 33 : 1; } );
+        auto t1 = o1.transform([] (bool& i) { return i ? 33 : 1; } );
         EXPECT_EQ(t1, nullopt);
     }
 
@@ -272,7 +273,7 @@ TEST(OptionalTest, ShouldTransform) {
         EXPECT_EQ(t, 1);
 
         optional<bool&> o1{};
-        auto t1 = o1.transform([] (int i) { return i ? 33 : 1; } );
+        auto t1 = o1.transform([] (bool& i) { return i ? 33 : 1; } );
         EXPECT_EQ(t1, nullopt);
     }
 }
@@ -280,32 +281,32 @@ TEST(OptionalTest, ShouldTransform) {
 TEST(OptionalTest, ShouldOrElse) {
     {
         optional<int> o{2};
-        auto t = o.or_else([] () { return optional<int>{3}; } );
+        auto t = o.or_else([]  { return optional<int>{3}; } );
         EXPECT_EQ(t, 2);
 
         optional<int> o1{};
-        auto t1 = o1.or_else([] () { return optional<int>{3}; } );
+        auto t1 = o1.or_else([]  { return optional<int>{3}; } );
         EXPECT_EQ(t1, 3);
     }
 
     {
         optional<bool> o{true};
-        auto t = o.or_else([] () { return optional<bool>{false}; } );
+        auto t = o.or_else([]  { return optional<bool>{false}; } );
         EXPECT_EQ(t, true);
 
         optional<bool> o1{};
-        auto t1 = o1.or_else([] () { return optional<bool>{false}; } );
+        auto t1 = o1.or_else([]  { return optional<bool>{false}; } );
         EXPECT_EQ(t1, false);
     }
 
     {
         bool b=false, b2=true;
         optional<bool&> o{b};
-        auto t = o.or_else([&] () { return optional<bool&>{b2}; } );
+        auto t = o.or_else([&]  { return optional<bool&>{b2}; } );
         EXPECT_EQ(t, b);
 
         optional<bool&> o1{};
-        auto t1 = o1.or_else([&] () { return optional<bool&>{b2}; } );
+        auto t1 = o1.or_else([&]  { return optional<bool&>{b2}; } );
         EXPECT_EQ(t1, b2);
     }
 }
@@ -313,32 +314,32 @@ TEST(OptionalTest, ShouldOrElse) {
 TEST(OptionalTest, ShouldAndThen) {
     {
         optional<int> o{2};
-        auto t = o.and_then([] (auto i) { return optional<int>{i}; } );
+        auto t = o.and_then([] (int& i) { return optional<int>{i}; } );
         EXPECT_EQ(t, o);
 
         optional<int> o1{};
-        auto t1 = o1.and_then([] (auto i) { return optional<int>{i}; } );
+        auto t1 = o1.and_then([] (int& i) { return optional<int>{i}; } );
         EXPECT_EQ(t1, nullopt);
     }
 
     {
         optional<bool> o{false};
-        auto t = o.and_then([] (auto i) { return optional<bool>{i}; } );
+        auto t = o.and_then([] (bool& i) { return optional<bool>{i}; } );
         EXPECT_EQ(t, o);
 
         optional<bool> o1{};
-        auto t1 = o1.and_then([] (auto i) { return optional<bool>{i}; });
+        auto t1 = o1.and_then([] (bool& i) { return optional<bool>{i}; });
         EXPECT_EQ(t1, nullopt);
     }
 
     {
         bool b=true;
         optional<bool&> o{b};
-        auto t = o.and_then([] (auto i) { return optional<bool&>{i}; } );
+        auto t = o.and_then([] (bool& i) { return optional<bool&>{i}; } );
         EXPECT_EQ(t, o);
 
         optional<bool&> o1{};
-        auto t1 = o1.and_then([] (auto i) { return optional<bool&>{i}; });
+        auto t1 = o1.and_then([] (bool& i) { return optional<bool&>{i}; });
         EXPECT_EQ(t1, nullopt);
     }
 }
