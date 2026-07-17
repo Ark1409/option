@@ -14,6 +14,7 @@ Header-only if compiling for C++17 or greater<sup>1</sup>.
 
 ```cpp
 #include <option/optinal.hpp>
+#include <string>
 
 option::optional<int> empty{};
 option::optional<int> also_empty{option::nullopt};
@@ -31,6 +32,9 @@ option::optional<bool> found_guess{guess == 3};
 
 if (found_guess) {
     std::cout << "Guessed: " << *found_guess << ", same as " << found_guess.value() << std::endl;
+
+    auto s = guess.and_then([] (bool&) { return std::string{"Holds value"}; });
+    std::cout << s << std::endl;
 }
 ```
 
@@ -71,4 +75,15 @@ following `static` functions to implement the class' functionality:
 
 Notice how the underlying type `U` need not match the type `T` of the `optional` itself.
 
-<sup>1</sup> `optional_traits<bool>` requires (`static`) data and can only be inlined in C++17.
+# Building / Using
+Building from source is as simple as
+```sh
+cmake [-DOPTION_TESTS=ON] -S . -B build
+cmake --build build
+```
+
+The library itself exposes the CMake target `option::option` for linking.
+
+Alternatively, just grab `include/option/optional.hpp` if using the library as header-only<sup>1</sup>.
+
+<sup>1</sup> `optional_traits<bool>` uses (`static`) data which requires C++17 to be inlined; lower versions need linking.
