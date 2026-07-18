@@ -1,6 +1,5 @@
 #include <option/optional.hpp>
 #include <gtest/gtest.h>
-#include <optional>
 #include <string>
 #include <type_traits>
 #include <iterator>
