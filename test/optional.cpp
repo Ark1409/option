@@ -86,21 +86,38 @@ TEST(OptionalTest, ShouldNotBeEmpty) {
 }
 
 TEST(OptionalTest, ShouldOnlyBeMovable) {
-    struct S { S() = default; S(const S&) = delete; S(S&&) = default; };
+    struct S {
+        S() = default;
+        S(const S&) = delete;
+        S(S&&) = default;
+    };
+
     EXPECT_FALSE(std::is_copy_constructible<optional<S>>::value);
     EXPECT_TRUE(std::is_move_constructible<optional<S>>::value);
     EXPECT_TRUE(std::is_trivially_destructible<optional<S>>::value);
 }
 
 TEST(OptionalTest, ShouldBeNonMoveable) {
-    struct S { S() = default; S(const S&) = delete; S(S&&) = delete; };
+    struct S {
+        S() = default;
+        S(const S&) = delete;
+        S(S&&) = delete;
+    };
+
     EXPECT_FALSE(std::is_copy_constructible<optional<S>>::value);
     EXPECT_FALSE(std::is_move_constructible<optional<S>>::value);
     EXPECT_TRUE(std::is_trivially_destructible<optional<S>>::value);
 }
 
 TEST(OptionalTest, ShouldOnlyBeMoveAssignable) {
-    struct S { S() = default; S(const S&) = default; S(S&&) = default; S& operator=(const S&) = delete; S& operator=(S&&) = default; };
+    struct S {
+        S() = default;
+        S(const S&) = default;
+        S(S&&) = default;
+        S& operator=(const S&) = delete;
+        S& operator=(S&&) = default;
+    };
+
     EXPECT_TRUE(std::is_copy_constructible<optional<S>>::value);
     EXPECT_TRUE(std::is_move_constructible<optional<S>>::value);
     EXPECT_FALSE(std::is_copy_assignable<optional<S>>::value);
@@ -108,9 +125,15 @@ TEST(OptionalTest, ShouldOnlyBeMoveAssignable) {
     EXPECT_TRUE(std::is_trivially_destructible<optional<S>>::value);
 }
 
-
 TEST(OptionalTest, ShouldBeNonMoveAssignable) {
-    struct S { S() = default; S(const S&) = default; S(S&&) = default; S& operator=(const S&) = delete; S& operator=(S&&) = delete; };
+    struct S {
+        S() = default;
+        S(const S&) = default;
+        S(S&&) = default;
+        S& operator=(const S&) = delete;
+        S& operator=(S&&) = delete;
+    };
+
     EXPECT_TRUE(std::is_copy_constructible<optional<S>>::value);
     EXPECT_TRUE(std::is_move_constructible<optional<S>>::value);
     EXPECT_FALSE(std::is_copy_assignable<optional<S>>::value);
@@ -146,22 +169,29 @@ using remove_cvref_t = typename std::remove_cv<typename std::remove_reference<T>
 
 TEST(OptionalTest, ShouldBeRandomAccessIterator) {
     using OptionT = optional<int>;
-    EXPECT_TRUE((std::is_same<remove_cvref_t<std::random_access_iterator_tag>, remove_cvref_t<typename std::iterator_traits<typename OptionT::iterator>::iterator_category>>::value
-            || std::is_base_of<remove_cvref_t<std::random_access_iterator_tag>, remove_cvref_t<typename std::iterator_traits<typename OptionT::iterator>::iterator_category>>::value));
+    EXPECT_TRUE((std::is_same<remove_cvref_t<std::random_access_iterator_tag>,
+                     remove_cvref_t<typename std::iterator_traits<typename OptionT::iterator>::iterator_category>>::value
+                 || std::is_base_of<remove_cvref_t<std::random_access_iterator_tag>,
+                     remove_cvref_t<typename std::iterator_traits<typename OptionT::iterator>::iterator_category>>::value));
 }
 
 #if __cplusplus >= 202002L
 TEST(OptionalTest, ShouldBeContiguousIterator) {
     using OptionT = optional<int>;
-    EXPECT_TRUE((std::is_same<remove_cvref_t<std::contiguous_iterator_tag>, remove_cvref_t<typename std::iterator_traits<typename OptionT::iterator>::iterator_category>>::value
-            || std::is_base_of<remove_cvref_t<std::contiguous_iterator_tag>, remove_cvref_t<typename std::iterator_traits<typename OptionT::iterator>::iterator_category>>::value));
+    EXPECT_TRUE(std::contiguous_iterator<typename OptionT::iterator>);
 }
 #endif
 
 TEST(OptionalTest, ShouldGetValue) {
+    optional<int> o{3};
+    EXPECT_EQ(o.value(), 3);
+
+    optional<bool> o1{false};
+    EXPECT_EQ(o1.value(), false);
+
     int i;
-    optional<int&> o{i};
-    EXPECT_EQ(&o.value(), &i);
+    optional<int&> o2{i};
+    EXPECT_EQ(&o2.value(), &i);
 }
 
 TEST(OptionalTest, ShouldGetDefaultValue) {
@@ -171,9 +201,9 @@ TEST(OptionalTest, ShouldGetDefaultValue) {
     optional<bool> o1{};
     EXPECT_EQ(o1.value_or(true), true);
 
-    bool b=true;
+    bool b = true;
     optional<bool&> o2{};
-    EXPECT_EQ(o2.value_or(b), b);
+    EXPECT_EQ(&o2.value_or(b), &b);
 }
 
 TEST(OptionalTest, ShouldReset) {
@@ -218,10 +248,10 @@ TEST(OptionalTest, ShouldSwap) {
         optional<bool&> o1{a};
         optional<bool&> o2{b};
         swap(o1, o2);
-        EXPECT_EQ(a, true);
-        EXPECT_EQ(b, false);
-        EXPECT_EQ(&o1.value(), &a);
-        EXPECT_EQ(&o2.value(), &b);
+        EXPECT_EQ(a, false);
+        EXPECT_EQ(b, true);
+        EXPECT_EQ(&o1.value(), &b);
+        EXPECT_EQ(&o2.value(), &a);
     }
 }
 
@@ -229,50 +259,50 @@ TEST(OptionalTest, ShouldEmplace) {
     {
         optional<int> o{1};
         o.emplace(2);
-        EXPECT_EQ(o,2);
+        EXPECT_EQ(o, 2);
     }
     {
         optional<bool> o{true};
         o.emplace(false);
-        EXPECT_EQ(o,false);
+        EXPECT_EQ(o, false);
     }
     {
-        bool a=true, b=false;
+        bool a = true, b = false;
         optional<bool&> o{a};
         o.emplace(b);
-        EXPECT_EQ(o,b);
+        EXPECT_EQ(o, b);
     }
 }
 
 TEST(OptionalTest, ShouldTransform) {
     {
         optional<int> o{2};
-        auto t = o.transform([] (int& i) { return i == 2; } );
+        auto t = o.transform([](int& i) { return i == 2; });
         EXPECT_EQ(t, true);
 
         optional<int> o1{};
-        auto t1 = o1.transform([] (int& i) { return i == 2; } );
+        auto t1 = o1.transform([](int& i) { return i == 2; });
         EXPECT_EQ(t1, nullopt);
     }
 
     {
         optional<bool> o{false};
-        auto t = o.transform([] (bool& i) { return i ? 33 : 1; } );
+        auto t = o.transform([](bool& i) { return i ? 33 : 1; });
         EXPECT_EQ(t, 1);
 
         optional<bool> o1{};
-        auto t1 = o1.transform([] (bool& i) { return i ? 33 : 1; } );
+        auto t1 = o1.transform([](bool& i) { return i ? 33 : 1; });
         EXPECT_EQ(t1, nullopt);
     }
 
     {
-        bool b;
+        bool b = false;
         optional<bool&> o{b};
-        auto t = o.transform([] (bool& i) { return i ? 33 : 1; } );
+        auto t = o.transform([](bool& i) { return i ? 33 : 1; });
         EXPECT_EQ(t, 1);
 
         optional<bool&> o1{};
-        auto t1 = o1.transform([] (bool& i) { return i ? 33 : 1; } );
+        auto t1 = o1.transform([](bool& i) { return i ? 33 : 1; });
         EXPECT_EQ(t1, nullopt);
     }
 }
@@ -280,32 +310,32 @@ TEST(OptionalTest, ShouldTransform) {
 TEST(OptionalTest, ShouldOrElse) {
     {
         optional<int> o{2};
-        auto t = o.or_else([]  { return optional<int>{3}; } );
+        auto t = o.or_else([] { return optional<int>{3}; });
         EXPECT_EQ(t, 2);
 
         optional<int> o1{};
-        auto t1 = o1.or_else([]  { return optional<int>{3}; } );
+        auto t1 = o1.or_else([] { return optional<int>{3}; });
         EXPECT_EQ(t1, 3);
     }
 
     {
         optional<bool> o{true};
-        auto t = o.or_else([]  { return optional<bool>{false}; } );
+        auto t = o.or_else([] { return optional<bool>{false}; });
         EXPECT_EQ(t, true);
 
         optional<bool> o1{};
-        auto t1 = o1.or_else([]  { return optional<bool>{false}; } );
+        auto t1 = o1.or_else([] { return optional<bool>{false}; });
         EXPECT_EQ(t1, false);
     }
 
     {
-        bool b=false, b2=true;
+        bool b = false, b2 = true;
         optional<bool&> o{b};
-        auto t = o.or_else([&]  { return optional<bool&>{b2}; } );
+        auto t = o.or_else([&] { return optional<bool&>{b2}; });
         EXPECT_EQ(t, b);
 
         optional<bool&> o1{};
-        auto t1 = o1.or_else([&]  { return optional<bool&>{b2}; } );
+        auto t1 = o1.or_else([&] { return optional<bool&>{b2}; });
         EXPECT_EQ(t1, b2);
     }
 }
@@ -313,53 +343,93 @@ TEST(OptionalTest, ShouldOrElse) {
 TEST(OptionalTest, ShouldAndThen) {
     {
         optional<int> o{2};
-        auto t = o.and_then([] (int& i) { return optional<int>{i}; } );
+        auto t = o.and_then([](int& i) { return optional<int>{i}; });
         EXPECT_EQ(t, o);
 
         optional<int> o1{};
-        auto t1 = o1.and_then([] (int& i) { return optional<int>{i}; } );
+        auto t1 = o1.and_then([](int& i) { return optional<int>{i}; });
         EXPECT_EQ(t1, nullopt);
     }
 
     {
         optional<bool> o{false};
-        auto t = o.and_then([] (bool& i) { return optional<bool>{i}; } );
+        auto t = o.and_then([](bool& i) { return optional<bool>{i}; });
         EXPECT_EQ(t, o);
 
         optional<bool> o1{};
-        auto t1 = o1.and_then([] (bool& i) { return optional<bool>{i}; });
+        auto t1 = o1.and_then([](bool& i) { return optional<bool>{i}; });
         EXPECT_EQ(t1, nullopt);
     }
 
     {
-        bool b=true;
+        bool b = true;
         optional<bool&> o{b};
-        auto t = o.and_then([] (bool& i) { return optional<bool&>{i}; } );
+        auto t = o.and_then([](bool& i) { return optional<bool&>{i}; });
         EXPECT_EQ(t, o);
 
         optional<bool&> o1{};
-        auto t1 = o1.and_then([] (bool& i) { return optional<bool&>{i}; });
+        auto t1 = o1.and_then([](bool& i) { return optional<bool&>{i}; });
         EXPECT_EQ(t1, nullopt);
     }
 }
 
-
 struct SNeq {
-    bool operator==(const SNeq& o) const noexcept { if(b) { *b = 1; } return o.b == b; }
-    bool operator!=(const SNeq& o) const noexcept { if(b) { *b = 2; } return o.b == b; }
+    constexpr bool operator==(const SNeq& o) const noexcept {
+        if (b) { *b = 1; }
+        return o.b == b;
+    }
+
+    constexpr bool operator!=(const SNeq& o) const noexcept {
+        if (b) { *b = 2; }
+        return o.b == b;
+    }
+
+    int* b;
+};
+
+struct SEq {
+    constexpr bool operator==(const SEq& o) const noexcept {
+        if (b) { *b = 1; }
+        return o.b == b;
+    }
+
     int* b;
 };
 
 template<>
-struct optional_traits<SNeq> {
-    constexpr static SNeq empty() noexcept { return {nullptr}; }
+struct option::optional_traits<SNeq> {
+    struct data_type : optional_traits_data<data_type, SNeq> {
+        constexpr data_type() : optional_traits_data(in_place, SNeq{nullptr}) {}
+
+        using optional_traits_data::optional_traits_data;
+    };
+};
+
+template<>
+struct option::optional_traits<SEq> {
+    struct data_type : optional_traits_data<data_type, SEq> {
+        constexpr data_type() : optional_traits_data(in_place, SEq{nullptr}) {}
+
+        using optional_traits_data::optional_traits_data;
+    };
 };
 
 TEST(OptionalTest, EnsureProperComparisonOverload) {
-    int n=0;
-    optional<SNeq> s{{&n}};
+    {
+        int n = 0;
+        optional<SNeq> s{{&n}};
 
-    (void)(bool)s;
+        (void)(bool)s;
 
-    EXPECT_EQ(n, 2);
+        EXPECT_EQ(n, 2);
+    }
+
+    {
+        int n = 0;
+        optional<SEq> s{{&n}};
+
+        (void)(bool)s;
+
+        EXPECT_EQ(n, 1);
+    }
 }

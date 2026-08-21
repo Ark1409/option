@@ -1,0 +1,44 @@
+---
+BasedOnStyle: LLVM
+AccessModifierOffset: -4
+AlignAfterOpenBracket: DontAlign
+AlignConsecutiveShortCaseStatements:
+  Enabled: true
+  AcrossComments: true
+AlignEscapedNewlines: LeftWithLastLine
+AlignTrailingComments:
+  Kind: Leave
+AllowBreakBeforeNoexceptSpecifier: OnlyWithParen
+AllowShortBlocksOnASingleLine: Always
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortLoopsOnASingleLine: true
+BreakArrays: false
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeTemplateCloser: true
+BreakBeforeTernaryOperators: false
+BreakInheritanceList: AfterComma
+BreakTemplateDeclarations: Yes
+ColumnLimit: 140
+FixNamespaceComments: false
+IndentPPDirectives: AfterHash
+IndentWidth: 4
+IntegerLiteralSeparator:
+  Binary: 8
+  Decimal: 3
+  DecimalMinDigits: 10
+KeepEmptyLines:
+  AtStartOfBlock: false
+  AtStartOfFile: false
+NamespaceIndentation: All
+PointerAlignment: Left
+QualifierAlignment: Left
+RemoveEmptyLinesInUnwrappedLines: true
+RequiresClausePosition: WithPreceding
+SeparateDefinitionBlocks: Always
+SortIncludes:
+  Enabled: false
+SortUsingDeclarations: Lexicographic
+SpaceAfterTemplateKeyword: false
+TabWidth: 4
+Language: Cpp

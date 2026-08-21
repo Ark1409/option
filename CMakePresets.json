@@ -1,0 +1,56 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 13,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "default",
+            "binaryDir": "build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": { "type": "STRING", "value": "Debug" }
+            }
+        },
+        {
+            "name": "default-release",
+            "binaryDir": "build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": { "type": "STRING", "value": "Release" }
+            }
+        },
+        {
+            "name": "dev",
+            "inherits": "default",
+            "cacheVariables": {
+                "OPTION_TESTS": { "type": "BOOL", "value": "ON" },
+                "CMAKE_EXPORT_COMPILE_COMMANDS": { "type": "BOOL", "value": "TRUE" },
+                "CMAKE_MESSAGE_LOG_LEVEL": { "type": "STRING", "value": "VERBOSE" }
+            },
+            "warnings": {
+                "deprecated": true,
+                "uninitialized": true,
+                "unusedCli": true
+            },
+            "errors": {
+                "deprecated": true
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "default",
+            "configurePreset": "default",
+            "jobs": 0
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "default",
+            "configurePreset": "dev",
+            "output": { "outputOnFailure": true },
+            "execution": { "noTestsAction": "error", "stopOnFailure": true }
+        }
+    ]
+}

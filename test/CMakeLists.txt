@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 3.11)
 
 list(APPEND CMAKE_MODULE_PATH "${option_SOURCE_DIR}/cmake")
-include(utils)
 
-find_package(GTest)
+include(utils)
+include(FetchContent)
+
+find_package(GTest 1.12.1)
 if(NOT GTest_FOUND)
-    include(FetchContent)
     FetchContent_Declare(
         googletest
         GIT_REPOSITORY https://github.com/google/googletest.git
@@ -14,17 +15,10 @@ if(NOT GTest_FOUND)
     FetchContent_MakeAvailable(googletest)
 endif()
 
-add_executable(option_test EXCLUDE_FROM_ALL optional.cpp)
+add_executable(option_test optional.cpp)
 target_link_libraries(option_test GTest::gtest GTest::gtest_main option::option)
 
 add_warnings(option_test)
 add_werror(option_test)
 
-add_test(option_tests ${CMAKE_CTEST_COMMAND}
-    --build-and-test "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}"
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${CMAKE_MAKE_PROGRAM}
-    --build-nocmake
-    --build-target option_test
-    --test-command option_test
-)
+add_test(option_test option_test)
