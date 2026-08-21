@@ -46,8 +46,8 @@ struct A {
     void* n; // Assume can never be nullptr
 };
 
-inline bool operator!=(A a, A b) noexcept {
-    return a.n != b.n;
+inline bool operator==(A a, A b) noexcept {
+    return a.n == b.n;
 }
 
 template<>
@@ -102,7 +102,7 @@ following functions to implement the class' functionality:
 - `data_type::data_type(option::in_place_t, Args&&...)` - Constructs a representation in-place from forwarded arguments.
 - `bool data_type::empty() const` - Checks stored value for emptiness.
 - `T& data_type::operator T&()` - Converts the stored value into a `T&`. Required if `!std::is_convertible_v<data_type&, T&>`.
-- `const T& data_type::operator const T&()` - Same but `const` version.
+- `const T& data_type::operator const T&() const` - Same but `const` version.
 - `void optional_traits<T>::make_empty(data_type*)` - `static` function that transforms a valid value into an empty
   representation. Can be used to make `reset` `constexpr` if necessary. This function is optional.
 
