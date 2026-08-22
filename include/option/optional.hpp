@@ -593,10 +593,10 @@ namespace option {
             }
 
             template<class U = optional_base,
-                typename void_t<decltype(typename U::traits_type::make_empty(std::declval<typename U::data_type*>()))>::type* = nullptr>
+                typename void_t<decltype(typename U::traits_type::make_empty(std::declval<typename U::data_type&>()))>::type* = nullptr>
             OPTION_CXX14_CONSTEXPR void reset_impl(void_t<>)
-                noexcept(noexcept(typename U::traits_type::make_empty(std::declval<typename U::data_type*>()))) {
-                traits_type::make_empty(&this->m_data);
+                noexcept(noexcept(typename U::traits_type::make_empty(std::declval<typename U::data_type&>()))) {
+                traits_type::make_empty(this->m_data);
             }
 
         private:
@@ -1305,7 +1305,7 @@ namespace option {
     struct optional_traits {
         using data_type = detail::detail2::option_data_type<T>;
 
-        static OPTION_CXX14_CONSTEXPR void make_empty(data_type* p) noexcept { p->clear(); }
+        static OPTION_CXX14_CONSTEXPR void make_empty(data_type& p) noexcept { p.clear(); }
     };
 
     template<typename T>
@@ -1322,7 +1322,7 @@ namespace option {
             T* value{};
         };
 
-        static inline OPTION_CXX14_CONSTEXPR void make_empty(data_type* p) noexcept { p->value = nullptr; }
+        static inline OPTION_CXX14_CONSTEXPR void make_empty(data_type& p) noexcept { p.value = nullptr; }
     };
 
 #ifdef OPTION_OPTIONAL_BOOL
@@ -1355,6 +1355,7 @@ namespace option {
                 alignas(bool) unsigned char buf[sizeof(bool)]{};
             } u{init_empty()};
 
+            // Find an invalid bit representation of bool
             inline static U init_empty() noexcept {
                 if (did_init) { return data_empty; }
 
@@ -1390,7 +1391,7 @@ namespace option {
 #endif
         };
 
-        static inline void make_empty(data_type* p) noexcept { p->u = data_type::init_empty(); }
+        static inline void make_empty(data_type& p) noexcept { p.u = data_type::init_empty(); }
     };
 #endif
 
