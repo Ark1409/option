@@ -585,7 +585,8 @@ namespace option {
 
         private:
             template<class W>
-            OPTION_CXX20_CONSTEXPR void reset_impl(W) noexcept(noexcept(has_value()) && std::is_nothrow_default_constructible<data_type>::value) {
+            OPTION_CXX20_CONSTEXPR void reset_impl(W)
+                noexcept(noexcept(has_value()) && std::is_nothrow_default_constructible<data_type>::value) {
                 if (has_value()) {
                     this->m_data.~data_type();
                     (construct_at)(&this->m_data);
@@ -593,10 +594,9 @@ namespace option {
             }
 
             template<class U = optional_base,
-                typename void_t<decltype(typename U::traits_type::make_empty(std::declval<typename U::data_type&>()))>::type* = nullptr>
-            OPTION_CXX14_CONSTEXPR void reset_impl(void_t<>)
-                noexcept(noexcept(typename U::traits_type::make_empty(std::declval<typename U::data_type&>()))) {
-                traits_type::make_empty(this->m_data);
+                typename void_t<decltype(std::declval<typename U::data_type&>().make_empty())>::type* = nullptr>
+            OPTION_CXX14_CONSTEXPR void reset_impl(void_t<>) noexcept(noexcept(std::declval<typename U::data_type&>().make_empty())) {
+                this->m_data.make_empty();
             }
 
         private:
@@ -898,6 +898,8 @@ namespace option {
                 constexpr operator const T&() const noexcept { return this->d.u.value; }
 
                 constexpr bool empty() const noexcept { return !this->d.valid; }
+
+                OPTION_CXX14_CONSTEXPR void make_empty() noexcept { this->clear(); }
             };
 
             template<class T, typename std::enable_if<std::is_move_constructible<T>::value && is_swappable<T>::value>::type* = nullptr>
@@ -1304,8 +1306,6 @@ namespace option {
     template<typename T>
     struct optional_traits {
         using data_type = detail::detail2::option_data_type<T>;
-
-        static OPTION_CXX14_CONSTEXPR void make_empty(data_type& p) noexcept { p.clear(); }
     };
 
     template<typename T>
@@ -1319,10 +1319,10 @@ namespace option {
 
             constexpr bool empty() const noexcept { return value == nullptr; }
 
+            OPTION_CXX14_CONSTEXPR void make_empty() noexcept { value = nullptr; }
+
             T* value{};
         };
-
-        static inline OPTION_CXX14_CONSTEXPR void make_empty(data_type& p) noexcept { p.value = nullptr; }
     };
 
 #ifdef OPTION_OPTIONAL_BOOL
@@ -1345,6 +1345,8 @@ namespace option {
                 }
                 return true;
             }
+
+            inline void make_empty() noexcept { this->u = data_type::init_empty(); }
 
             union U {
                 constexpr U() noexcept = default;
@@ -1390,8 +1392,6 @@ namespace option {
             static thread_local U data_empty;
 #endif
         };
-
-        static inline void make_empty(data_type& p) noexcept { p.u = data_type::init_empty(); }
     };
 #endif
 

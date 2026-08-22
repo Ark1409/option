@@ -17,6 +17,7 @@ endif()
 
 add_executable(option_test optional.cpp)
 target_link_libraries(option_test GTest::gtest GTest::gtest_main option::option)
+target_compile_definitions(option_test PRIVATE OPTION_OPTIONAL_BOOL=1)
 
 add_warnings(option_test)
 add_werror(option_test)

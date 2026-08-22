@@ -103,8 +103,8 @@ following functions to implement the class' functionality:
 - `bool data_type::empty() const` - Checks stored value for emptiness.
 - `T& data_type::operator T&()` - Converts the stored value into a `T&`. Required if `!std::is_convertible_v<data_type&, T&>`.
 - `const T& data_type::operator const T&() const` - Same but `const` version.
-- `void optional_traits<T>::make_empty(data_type&)` - `static` function that transforms a valid value into an empty
-  representation. Can be used to make `reset` `constexpr` if necessary. This function is optional.
+- `void data_type::make_empty() noexcept` - Transforms a valid value into an empty representation. Can be used to make `reset` `constexpr`
+  if necessary. This function is optional.
 
 Notice how the type stored in `data_type` need not match the type `T` of the `optional` itself due to the implicit
 conversion.
