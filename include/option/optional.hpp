@@ -248,7 +248,7 @@ namespace option {
         template<class Fn, class... ArgTypes>
         struct is_nothrow_invocable : std::integral_constant<bool, noexcept(invoke(std::declval<Fn>(), std::declval<ArgTypes>()...))> {};
 
-        template<typename U>
+        template<typename>
         struct specialized_optional;
 
         template<typename>
@@ -1269,7 +1269,7 @@ namespace option {
     using optional = detail::optional_base<T>;
 
     namespace detail {
-        template<typename TSelf, typename T,  class = void>
+        template<typename TSelf, typename T, class = void>
         struct optional_traits_data {
             template<typename... Args, typename std::enable_if<std::is_constructible<T, Args...>::value>::type* = nullptr>
             constexpr optional_traits_data(in_place_t, Args&&... args) noexcept(std::is_nothrow_constructible<T, Args...>::value)
@@ -1300,8 +1300,8 @@ namespace option {
         };
     }
 
-    template<typename T, typename TSelf>
-    using optional_traits_data = detail::optional_traits_data<T, TSelf>;
+    template<typename TSelf, typename T>
+    using optional_traits_data = detail::optional_traits_data<TSelf, T>;
 
     template<typename T>
     struct optional_traits {
@@ -1339,8 +1339,8 @@ namespace option {
 
             bool empty() const noexcept {
                 for (std::size_t i = 0; i < sizeof(bool); i++) {
-                    if (*static_cast<const unsigned char*>(static_cast<const void*>(&u)) + i
-                        != *static_cast<const unsigned char*>(static_cast<const void*>(&data_empty)) + i)
+                    if (*(static_cast<const unsigned char*>(static_cast<const void*>(&u)) + i)
+                        != *(static_cast<const unsigned char*>(static_cast<const void*>(&data_empty)) + i))
                         return false;
                 }
                 return true;
